@@ -1,17 +1,18 @@
 package ub.cse.algo;
 
-import java.lang.reflect.Array;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Objects;
+
 
 public class Solution {
 
     private int _startNode;
     private int _endNode;
     private HashMap<Integer, ArrayList<Integer>> graph;
-    private int weight;
-    private int weightPosition = 0;
+
 
     public Solution(int startNode, int endNode, HashMap<Integer, ArrayList<Integer>> g) {
         _startNode = startNode;
@@ -19,97 +20,100 @@ public class Solution {
         graph = g;
     }
 
-//    FIGURE OUT HOW TO IMPLEMENT THIS USING A PRIORITY QUEUE!!!!!
-//    THINK ABOUT THIS... WHAT IS A PRIORITY QUUEUE AND HOW DOES IT WORK!?
+    class Node implements Comparable<Node> {
+        private int weight;
+        private int node;
+
+        public Node(int weight, int node) {
+            this.weight = weight;
+            this.node = node;
+        }
+
+        public int getWeight() {
+            return weight;
+        }
+
+        public void setWeight(String name) {
+            this.weight = weight;
+        }
+
+        public int getNode() {
+            return node;
+        }
+
+        public void setNode(double salary) {
+            this.node = node;
+        }
+
+        @Override
+        public String toString() {
+            return "NODE{" +
+                    "weight='" + weight + '\'' +
+                    ", node=" + node +
+                    '}';
+        }
+
+        @Override
+        public int compareTo(Node employee) {
+            if (this.getWeight() > this.getWeight()) {
+                return 1;
+            } else if (this.getWeight() < employee.getWeight()) {
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+
+    }
 
     public ArrayList<Integer> outputPath() {
         /*
          * Find the smallest weighted path between _startNode and _endNode
          * The first number of graph's adjacency list is the weight of it's node
          */
-        Map<Integer, Integer> visitedNodes = new HashMap<>();
+        PriorityQueue<Node> visitedNodes = new PriorityQueue<>();
         ArrayList<Integer> output = new ArrayList<>();
 
-        int nodeToExplore;
-        int newNodeToExplore;
-        int doesntExist = -1;
+        int weightPosition = 0;
+        int currNode = _startNode;
+        int graphSize = graph.size();
+        int counter = 0;
 
-        output.add(_startNode);
+        //PROBLEM IS VISTEDNODES IS NOT UPDATING CORRECTLY
+//        STEP THROUGH THE PROCESS OF THE NEXT NODE TO BE PICKED BASED ON ADJACENCY LIST ON PAPER
+//        REPLICATE THE PAPER STEP THROUGH IN CODE
 
-        nodeToExplore = findNodeWithMinWeight(graph.get(_startNode));
-        output.add(nodeToExplore);
+        System.out.println(_startNode);
+        System.out.println(_endNode);
+        while (counter < graphSize && currNode != _endNode) {
+            int nodeWeight = graph.get(currNode).get(weightPosition);
 
-        while (nodeToExplore != _endNode && nodeToExplore != doesntExist) {
-            weight = graph.get(nodeToExplore).get(weightPosition);
-            visitedNodes.put(nodeToExplore, weight);
-
-//            THERE IS A HUGE PROBLEM WITH THIS LOGIC!!!! --- STEP THROUGH WITH PAPER AND PENCIL AND IDENTIFY WHAT IS SUPPOSED TO HAPPEN
-//            THE NODE TO EXPLORE AND THE HASH TABLE AREN'T WORKING THE WAY THEY ARE SUPPOSED TO
-//            STEP THROUGH THIS FUNCTION AGAIN AND CORRECT EVERY ERA STEP BY STEP
-
-            newNodeToExplore = findNodeWithMinWeight(visitedNodes);
-
-            if (graph.get(nodeToExplore).indexOf(newNodeToExplore) == doesntExist && nodeToExplore != newNodeToExplore) {
-                int nodeToremove = output.indexOf(nodeToExplore);
-                output.remove(nodeToremove);
+            for (int i = 1; i < graph.get(currNode).size(); i++) {
+                int neighbour = graph.get(currNode).get(i);
+                int newNodeWeight = nodeWeight + graph.get(neighbour).get(weightPosition);
+                visitedNodes.add(new Node(newNodeWeight, neighbour));
             }
-            output.add(newNodeToExplore);
 
+            if (!output.isEmpty()) {
+                int lastElement = output.get(output.size() - 1);
+//                    I WANT TO CHECK IF THE LAST ELEMENT IS A PARENT OF THE CURR NODE
+                if (graph.get(lastElement).indexOf(currNode) == -1) {
+                    output.remove(lastElement);
+                }
+                output.add(currNode);
 
-            nodeToExplore = findNodeWithMinWeight(graph.get(newNodeToExplore));
-        }
-        if (nodeToExplore == doesntExist) {
-            output.clear();
-            return output;
+            } else {
+                output.add(currNode);
+            }
+            ++counter;
+            currNode = visitedNodes.poll().getNode();
+            System.out.println(graph.get(currNode));
         }
         output.add(_endNode);
-
         return output;
     }
 
-    public int findNodeWithMinWeight(ArrayList<Integer> listOfNodesWithWeights) {
-        int minNode;
-        int minNodeWeight;
-        int notConnected = -1;
-        int neighbour = 1;
-        int currNode;
-        int currNodeWeight;
 
-        if (!listOfNodesWithWeights.isEmpty()) {
-            minNode = listOfNodesWithWeights.get(neighbour);
-            minNodeWeight = graph.get(minNode).get(weightPosition);
-
-            for (int i = 2; i < listOfNodesWithWeights.size(); i++) {
-                currNode = listOfNodesWithWeights.get(i);
-                currNodeWeight = graph.get(currNode).get(weightPosition);
-
-                if (currNodeWeight < minNodeWeight) {
-                    minNode = currNode;
-                    minNodeWeight = currNodeWeight;
-                }
-            }
-        } else {
-            minNode = notConnected;
-        }
-        return minNode;
-    }
-
-    public static int findNodeWithMinWeight(Map<Integer, Integer> visitedNodes) {
-        int nodeWithMinWeight = 99999;
-
-        for (int value: visitedNodes.values()) {
-            if (value < nodeWithMinWeight) {
-                nodeWithMinWeight = value;
-            }
-        }
-        for (Map.Entry<Integer, Integer> entry : visitedNodes.entrySet()) {
-            if (entry.getValue().equals(nodeWithMinWeight)) {
-                nodeWithMinWeight = entry.getKey();
-            }
-        }
-
-        return nodeWithMinWeight;
-    }
 }
 
 
