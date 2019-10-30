@@ -78,13 +78,8 @@ public class Solution {
         int currNode = _startNode;
         int graphSize = graph.size();
         int counter = 0;
+        ArrayList<Integer> exploredNodes = new ArrayList<>();
 
-        //PROBLEM IS VISTEDNODES IS NOT UPDATING CORRECTLY
-//        STEP THROUGH THE PROCESS OF THE NEXT NODE TO BE PICKED BASED ON ADJACENCY LIST ON PAPER
-//        REPLICATE THE PAPER STEP THROUGH IN CODE
-
-        System.out.println(_startNode);
-        System.out.println(_endNode);
         while (counter < graphSize && currNode != _endNode) {
             int nodeWeight = graph.get(currNode).get(weightPosition);
 
@@ -93,21 +88,28 @@ public class Solution {
                 int newNodeWeight = nodeWeight + graph.get(neighbour).get(weightPosition);
                 visitedNodes.add(new Node(newNodeWeight, neighbour));
             }
+            if (output.indexOf(currNode) == -1) {
+                if (!output.isEmpty()) {
+                    int lastElement = output.get(output.size() - 1);
+                    if (graph.get(lastElement).indexOf(currNode) == -1) {
+                        output.remove(lastElement);
+                    }
+                    output.add(currNode);
 
-            if (!output.isEmpty()) {
-                int lastElement = output.get(output.size() - 1);
-//                    I WANT TO CHECK IF THE LAST ELEMENT IS A PARENT OF THE CURR NODE
-                if (graph.get(lastElement).indexOf(currNode) == -1) {
-                    output.remove(lastElement);
+                } else {
+                    output.add(currNode);
                 }
-                output.add(currNode);
-
-            } else {
-                output.add(currNode);
             }
+
             ++counter;
+
             currNode = visitedNodes.poll().getNode();
-            System.out.println(graph.get(currNode));
+            exploredNodes.add(currNode);
+
+            while (exploredNodes.indexOf(currNode) == -1) {
+                visitedNodes.remove(currNode);
+            }
+            currNode = visitedNodes.poll().getNode();
         }
         output.add(_endNode);
         return output;
