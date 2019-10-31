@@ -71,46 +71,69 @@ public class Solution {
          * Find the smallest weighted path between _startNode and _endNode
          * The first number of graph's adjacency list is the weight of it's node
          */
-        PriorityQueue<Node> visitedNodes = new PriorityQueue<>();
+        PriorityQueue<Node> pq = new PriorityQueue<>();
         ArrayList<Integer> output = new ArrayList<>();
-
-        int weightPosition = 0;
-        int currNode = _startNode;
-        int graphSize = graph.size();
-        int counter = 0;
+        HashMap<Integer, ArrayList> tempGraph = new HashMap<>();
         ArrayList<Integer> exploredNodes = new ArrayList<>();
 
-        while (counter < graphSize && currNode != _endNode) {
-            int nodeWeight = graph.get(currNode).get(weightPosition);
+        tempGraph.putAll(graph);
 
-            for (int i = 1; i < graph.get(currNode).size(); i++) {
-                int neighbour = graph.get(currNode).get(i);
-                int newNodeWeight = nodeWeight + graph.get(neighbour).get(weightPosition);
-                visitedNodes.add(new Node(newNodeWeight, neighbour));
+        int currentNode = _startNode;
+        int leastAmntNeibas = 1;
+        int weightPosition = 0;
+        int weightOfCurrentNode = 0;
+
+        //end if the graph is emepty or if we find the end node
+        while (!graph.isEmpty() && currentNode != _endNode) {
+            //check if the graph is connected, that is, had at least one neighbour
+
+            //compute the weight for the current node
+            if (exploredNodes.indexOf(currentNode) != -1){
+                weightOfCurrentNode = graph.get(currentNode).get(weightPosition);
             }
-            if (output.indexOf(currNode) == -1) {
-                if (!output.isEmpty()) {
-                    int lastElement = output.get(output.size() - 1);
-                    if (graph.get(lastElement).indexOf(currNode) == -1) {
-                        output.remove(lastElement);
+
+
+            for (int i = 1; i < graph.get(currentNode).size(); i++) {
+                //if it has already been visited, do not add it to the nodes in the pq
+                if (exploredNodes.indexOf(i) == -1){
+                    int neighbour = graph.get(currentNode).get(i);
+                    if (exploredNodes.indexOf(neighbour) == -1 && exploredNodes.indexOf(currentNode) != -1) {
+                        int newNodeWeight = weightOfCurrentNode + graph.get(neighbour).get(weightPosition);
+                        pq.add(new Node(newNodeWeight, neighbour));
                     }
-                    output.add(currNode);
 
-                } else {
-                    output.add(currNode);
                 }
+
+            }
+            exploredNodes.add(currentNode);
+            tempGraph.get(currentNode).remove(weightPosition);
+
+            if (!output.isEmpty()) {
+                int lastElement = output.get(output.size() - 1);
+                if (tempGraph.get(lastElement).indexOf(currentNode) == -1) {
+                    output.remove(output.size() - 1);
+                }
+            }//end if output is empty
+            output.add(currentNode);
+            graph.remove(currentNode);
+            if (!pq.isEmpty()){
+                currentNode = pq.poll().node;
             }
 
-            ++counter;
 
-            currNode = visitedNodes.poll().getNode();
-            exploredNodes.add(currNode);
-
-            while (exploredNodes.indexOf(currNode) == -1) {
-                visitedNodes.remove(currNode);
+            while (exploredNodes.indexOf(currentNode) != -1 && !pq.isEmpty()) {
+                pq.remove();
+                currentNode = pq.poll().node;
             }
-            currNode = visitedNodes.poll().getNode();
-        }
+
+            if (tempGraph.get(currentNode).size() < leastAmntNeibas) {
+                output.clear();
+                return output;
+            }
+
+        }//end while
+
+
         output.add(_endNode);
         return output;
     }
