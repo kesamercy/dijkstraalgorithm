@@ -77,7 +77,7 @@ public class Solution {
         PriorityQueue<Node> pq = new PriorityQueue<>(graphSize);
         int weightPosition = 0;
         int currntNode = _startNode;
-        PriorityQueue<Node> shortestPathNodes = new PriorityQueue<>(graphSize);
+        PriorityQueue<Node> consideredNodes = new PriorityQueue<>(graphSize);
 
 //        add the start node at the begining
         for (int i = 0; i < weightsFromTheStartNode.length; i++) {
@@ -97,41 +97,28 @@ public class Solution {
             Node removedNodePair = pq.poll();
             int newNode = removedNodePair.getNode();
 
-
             if (newNode == _endNode) {
+
+                System.out.println("weight of node " + weightsFromTheStartNode[3]);
+
                 //add the start node to the out put nodes
                 outPutNodes.add(_startNode);
                 System.out.println("I found the end node, time to get out of here");
                 //print the index for the nodes in the shortest path boolen
-                for (int i = 0; i < nodesInShortestPath.length ; i++) {
-                    if (nodesInShortestPath[i] == false){
+                for (int i = 0; i < nodesInShortestPath.length; i++) {
+                    if (nodesInShortestPath[i] == false) {
+                        consideredNodes.add(new Node(weightsFromTheStartNode[i], i));
                         System.out.println("I came before the sucker over there " + i);
-                        outPutNodes.add(i);
                         if (i == _endNode) {
+                            int j = 0;
+                            while (j != _endNode) {
+                                j = consideredNodes.poll().node;
+                                outPutNodes.add(j);
+                            }
                             return outPutNodes;
                         }
                     }
-
                 }
-
-//                print out the array for the nodes at this point
-                System.out.println(Arrays.toString(weightsFromTheStartNode));
-                //add the start node to the output array
-                outPutNodes.add(_startNode);
-                System.out.println(outPutNodes);
-                //find the nodes with the smallest weight, if they are the end node
-                //copy the array to a pq. the pq will have the index being i and weignth being value/ sort them using compar4
-                for (int i = 0; i < weightsFromTheStartNode.length; i++) {
-                    shortestPathNodes.add(new Node(weightsFromTheStartNode[i], i));
-                }
-                int noderetrived = 0;
-                while (noderetrived != _endNode){
-                    noderetrived = shortestPathNodes.poll().node;
-                    outPutNodes.add(noderetrived);
-                }
-                System.out.println("Node with the least dist " + outPutNodes);
-
-                System.exit(-1);
             }
 
             //if the node doesn't exist in the nodes in the shortest path, add it
@@ -140,27 +127,31 @@ public class Solution {
 
                 //go through all the neighbours of the new node
                 for (int i = 1; i < graph.get(newNode).size(); i++) {
-                    int neighbour = graph.get(newNode).get(i);
-                    int nodeWeight = graph.get(newNode).get(weightPosition);
+//                    check if the node has neighs....how? does it have a size of greater than 1?
+                    if (graph.get(newNode).size() > 1) {
 
-                    //if the neighbour for the node is not in the nodes in shortest path already, meaning it's not explored, then add it
-                    if (nodesInShortestPath[neighbour] == false) {
-                        int newneighbourWeight = nodeWeight + graph.get(neighbour).get(weightPosition);
-                        int oldNeighbourWeight = weightsFromTheStartNode[neighbour];
+                        int neighbour = graph.get(newNode).get(i);
+                        int nodeWeight = graph.get(newNode).get(weightPosition);
 
-                       //check if the current weight of the node is less than the weight in the weightsfromthestrat node array
-                        if (oldNeighbourWeight > newneighbourWeight) {
-                            pq.add(new Node(newneighbourWeight, neighbour));
-                            weightsFromTheStartNode[neighbour] = newneighbourWeight;
-                        }//end if
+                        //if the neighbour for the node is not in the nodes in shortest path already, meaning it's not explored, then add it
+                        if (nodesInShortestPath[neighbour] == false) {
+                            int newneighbourWeight = nodeWeight + graph.get(neighbour).get(weightPosition);
+                            int oldNeighbourWeight = weightsFromTheStartNode[neighbour];
+
+                            //check if the current weight of the node is less than the weight in the weightsfromthestrat node array
+                            if (oldNeighbourWeight > newneighbourWeight) {
+                                pq.add(new Node(newneighbourWeight, neighbour));
+                                weightsFromTheStartNode[neighbour] = newneighbourWeight;
+                            }//end if
+                        }
                     }
-
+                    else {
+                        return outPutNodes;
+                    }
                 }
             }
         }
 
-        //use a prioirty to queue to add the numbers
-        //take care of the cost of the start node
         return outPutNodes;
     }
 
